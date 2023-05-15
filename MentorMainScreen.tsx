@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import axios from 'axios';
-import Icon from 'react-native-vector-icons/FontAwesome';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import ChartComponent from './ChartComponent';
 import {
   Dimensions,
   InputAccessoryView,
@@ -17,20 +18,35 @@ import {
   View,
 } from 'react-native';
 
-const MentorMainScreen = () => {
-  const [statistics, setStatistics] = useState<any[]>([]);
 
-  // Fetch the statistics data from the server
-  useEffect(() => {
-    axios.get('http://192.168.14.3:8000/api/rec')
-      .then(response => {
-        const data = response.data;
-        setStatistics(data);
-      })
-      .catch(error => {
+function MentorMainScreen(): JSX.Element {
+  const BASE_URL = 'http://192.168.14.3:8000';
+  const navigation = useNavigation();
+  const [recList, setRecList] = useState<any[]>([]);
+  const [org_name, setOrgName] = useState<string>("");
+    // Retrieve the value
+    AsyncStorage.getItem('user_org_name')
+    .then((value) => {
+        // Handle the retrieved value
+        if(value) {
+          setOrgName(value);
+        }
+    })
+    .catch((error) => {
+        // Handle errors
         console.error(error);
-      });
-  }, []);
+    });
+    useEffect(() => {
+      axios
+        .get(BASE_URL+'/api/rec/'+org_name)
+        .then(response => {
+          const data = response.data;
+          setRecList(data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }, []);
   
 
   const backgroundStyle = {
@@ -59,36 +75,22 @@ const MentorMainScreen = () => {
               <Text>Results</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {statistics.length > 0 ? (
-              statistics.map(statistic => (
-                <View key={statistic._id} style={styles.listItem}>
-                  <Image source={{ uri: statistic.frame }} style={styles.listItemImage} />
-                  <Text>{statistic.orgName}</Text>
-                  <Text>{statistic.gameID}</Text>
-                  <View style={styles.accept_or_deny_container}>
-                    <Image source={require('./images/V.png')} style={styles.accept_icon}/>
-                    <Image source={require('./images/X.png')} style={styles.deny_icon}/>
-                  </View>
-                </View>
-              ))
+          <ChartComponent >
 
-            ) : (
-              <Text>No statistics found</Text>
-            )}
-          </ScrollView>
+          </ChartComponent>
         </View>
-        {/* <View style={styles.footerContainer}></View> */}
       </View>
     </SafeAreaView>
   );
 };
-const windowsHight = Dimensions.get('window').height;
-
+const windowsHeight = Dimensions.get('window').height;
+function openModal(gameID:string) {
+  console.log(gameID);
+}
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    height: windowsHight * 0.1,
+    height: windowsHeight * 0.1,
     backgroundColor: 'white',
   },
   logo: {

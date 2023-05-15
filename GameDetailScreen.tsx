@@ -22,8 +22,10 @@ interface Game {
 }
 
 const GameDetailScreen = ({ route }: GameDetailScreenProps): JSX.Element => {
+
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const { game } = route.params;
+    const [refresh, setRefresh] = useState(false);
     // Fetch the recommendations data from the server
     useEffect(() => {
       axios.get('http://192.168.14.3:8000/api/rec')
@@ -42,6 +44,31 @@ const GameDetailScreen = ({ route }: GameDetailScreenProps): JSX.Element => {
     borderWidth: 4,
     borderColor: 'green',
   };
+function handleButtonPress(recommendationId:string, color:string) {
+  const url = `http://192.168.14.3:8000/api/rec/${recommendationId}`;
+    console.log(recommendationId);
+  const body = {
+    status: color === 'green' ? 1 : -1
+  };
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+    .then(response => {
+      // Reload the current page
+      setRefresh(true)
+      console.log(response.json());
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+  console.log(recommendationId);
+}
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -78,14 +105,22 @@ const GameDetailScreen = ({ route }: GameDetailScreenProps): JSX.Element => {
                     <Text>{recommendation.orgName}</Text>
                     <Text>{recommendation.gameID}</Text>
                     <View style={styles.accept_or_deny_container}>
+                        <TouchableOpacity
+                        onPress={() => handleButtonPress(recommendation._id, 'green')}
+                        >
                         <Image
-                        source={require('./images/V.png')}
-                        style={styles.accept_icon}
+                            source={require('./images/V.png')}
+                            style={styles.accept_icon}
                         />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                        onPress={() => handleButtonPress(recommendation._id, 'red')}
+                        >
                         <Image
-                        source={require('./images/X.png')}
-                        style={styles.deny_icon}
+                            source={require('./images/X.png')}
+                            style={styles.deny_icon}
                         />
+                        </TouchableOpacity>
                     </View>
                     </View>
                 ))

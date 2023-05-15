@@ -19,6 +19,8 @@ import {
 
 
 function MentorMyListScreen(): JSX.Element {
+  let successRecStatus = 0;
+  let wrongRecStatus = 0;
   const navigation = useNavigation();
   const [gameList, setGameList] = useState<any[]>([]);
   const [org_name, setOrgName] = useState<string>("");
@@ -75,7 +77,7 @@ function MentorMyListScreen(): JSX.Element {
           </View>
           <ScrollView>
       {gameList.map(game => {
-        if(game.orgName === org_name)
+        if(game.orgName === org_name){
           return ((
               <TouchableOpacity
                 key={game.timestamp}
@@ -87,7 +89,7 @@ function MentorMyListScreen(): JSX.Element {
                 <Text>Date: {game.timestamp}</Text>
               </View>
             </TouchableOpacity>
-          ))
+          ))}
       })}
     </ScrollView>
         </View>
