@@ -5,7 +5,6 @@
  * @format
  */
  import React, { useState } from 'react';
- import type {PropsWithChildren} from 'react';
  import { useNavigation } from '@react-navigation/native';
  import MentorMainScreen from './MentorMainScreen';
 
@@ -31,6 +30,8 @@
    LearnMoreLinks,
    ReloadInstructions,
  } from 'react-native/Libraries/NewAppScreen';
+ import AsyncStorage from '@react-native-async-storage/async-storage';
+
  
  // type SectionProps = PropsWithChildren<{
  //   title: string;
@@ -79,14 +80,14 @@
         console.log(data);
         // Store the user data using AsyncStorage or another storage method
         // For example:
-        // AsyncStorage.setItem("user_token", data.accessToken);
-        // AsyncStorage.setItem("user_org_name", data.orgName);
-        // AsyncStorage.setItem("user_a", data.orgName);
-        // AsyncStorage.setItem("user_name", data.name);
-        // AsyncStorage.setItem("user_role", data.role);
+        AsyncStorage.setItem("user_token", data.accessToken);
+        AsyncStorage.setItem("user_org_name", data.orgName);
+        AsyncStorage.setItem("user_a", data.orgName);
+        AsyncStorage.setItem("user_name", data.name);
+        AsyncStorage.setItem("user_role", data.role);
         if (data.role === 'trainer') {
           // Redirect to the mentor main page
-          navigation.navigate('MentorMainScreen');
+          navigation.navigate('MentorMyListScreen');
 
         }
         if (data.role === 'trainee') {
