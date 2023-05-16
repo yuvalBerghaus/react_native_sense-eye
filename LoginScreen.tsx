@@ -10,10 +10,7 @@
 
  import {
    Dimensions,
-   InputAccessoryView,
    SafeAreaView,
-   ScrollView,
-   StatusBar,
    StyleSheet,
    Image,
    TouchableOpacity,
@@ -23,13 +20,6 @@
    View,
  } from 'react-native';
  
- import {
-   Colors,
-   DebugInstructions,
-   Header,
-   LearnMoreLinks,
-   ReloadInstructions,
- } from 'react-native/Libraries/NewAppScreen';
  import AsyncStorage from '@react-native-async-storage/async-storage';
 
  
@@ -200,10 +190,6 @@
     width: 50,
     height: 50
   },
-  // logo: {
-  //   width: 385,
-  //   height: 98
-  // },
   logo: {
     width: "100%",
     height: "60%"

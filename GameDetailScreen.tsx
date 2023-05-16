@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Dimensions, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
 type GameDetailScreenProps = {
     route: {
       params: {
@@ -22,7 +22,7 @@ interface Game {
 }
 
 const GameDetailScreen = ({ route }: GameDetailScreenProps): JSX.Element => {
-
+  const navigation = useNavigation();
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const { game } = route.params;
     const [refresh, setRefresh] = useState(false);
@@ -46,7 +46,6 @@ const GameDetailScreen = ({ route }: GameDetailScreenProps): JSX.Element => {
   };
 function handleButtonPress(recommendationId:string, color:string) {
   const url = `http://192.168.14.3:8000/api/rec/${recommendationId}`;
-    console.log(recommendationId);
   const body = {
     status: color === 'green' ? 1 : -1
   };
@@ -79,10 +78,10 @@ function handleButtonPress(recommendationId:string, color:string) {
         <View style={styles.middleContainer}>
           {/* Navbar */}
           <View style={styles.navbar}>
-            <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('MentorMainScreen')}>
               <Text>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('MentorMyListScreen')}>
               <Text>My List</Text>
             </TouchableOpacity>
             <TouchableOpacity>

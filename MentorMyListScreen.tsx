@@ -65,10 +65,10 @@ function MentorMyListScreen(): JSX.Element {
         <View style={styles.middleContainer}>
           {/* Navbar */}
           <View style={styles.navbar}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('MentorMainScreen')}>
               <Text>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('MentorMyListScreen')}>
               <Text>My List</Text>
             </TouchableOpacity>
             <TouchableOpacity>

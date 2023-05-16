@@ -5,6 +5,7 @@ import LoginScreen from './LoginScreen';
 import MentorMainScreen from './MentorMainScreen';
 import MentorMyListScreen from './MentorMyListScreen';
 import GameDetailScreen from './GameDetailScreen';
+
 const Stack = createStackNavigator();
 
 const App = (): JSX.Element => {
@@ -13,9 +14,11 @@ const App = (): JSX.Element => {
       <Stack.Navigator>
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="MentorMyListScreen" component={MentorMyListScreen} />
+        <Stack.Screen name="MentorMainScreen" component={MentorMainScreen} />
         <Stack.Screen name="GameDetailScreen" component={GameDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    
   );
 };
 
