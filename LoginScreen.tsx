@@ -28,9 +28,7 @@
  // }>;
  
  function LoginScreen(): JSX.Element {
-   // const isDarkMode = useColorScheme() === 'dark';
    const navigation = useNavigation();
-   
    const [email, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState('');
@@ -194,5 +192,6 @@
     width: "100%",
     height: "60%"
   }
+  
  });
  export default LoginScreen;
