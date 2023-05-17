@@ -3,18 +3,42 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import WebView from 'react-native-webview';
+import ChartsEmbedSDK from '@mongodb-js/charts-embed-dom';
+
 // const Stack = createStackNavigator();
 
-const NavBar = (): JSX.Element => {
+
+const MyChart = () => {
+  console.log('https://charts.mongodb.com/charts-project-0-nrlga/embed/charts?id=64639860-a17a-4043-8b21-cbc64cdb4bee&maxDataAge=300&theme=light&autoRefresh=true')
   return (
+    <WebView
+  source={{
+    uri:
+      'https://charts.mongodb.com/charts-project-0-nrlga/embed/charts?id=64639860-a17a-4043-8b21-cbc64cdb4bee&maxDataAge=300&theme=light&autoRefresh=true',
+  }}
+  style={{ flex: 1, height:100,width:350}}
+  onError={(syntheticEvent) => {
+    const { nativeEvent } = syntheticEvent;
+    console.error('WebView error:', nativeEvent);
+  }}
+/>
+
+  );
+};
+
+
+
+
+const NavBar = ({ handleMenuClick }: { handleMenuClick: MenuClickHandler }): JSX.Element => {  return (
     <View style={styles.navbar}>
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => handleMenuClick('home')}>
       <Text>Home</Text>
     </TouchableOpacity>
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => handleMenuClick('my_list')}>
         <Text>My List</Text>
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => handleMenuClick('results')}>
         <Text>Results</Text>
       </TouchableOpacity>
     </View>
@@ -116,7 +140,6 @@ function handleButtonPress(recommendationId:string, color:string) {
 
 
 
-
 const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   const [email, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -192,7 +215,7 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   )
 }
 type GameClickHandler = (game: Game) => void;
-
+type MenuClickHandler = (menu:string) => void;
 const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }): JSX.Element => {
   let successRecStatus = 0;
     let wrongRecStatus = 0;
@@ -222,14 +245,6 @@ const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }):
             console.error(error);
           });
       }, []);
-    
-  
-    const backgroundStyle = {
-      backgroundColor: 'white',
-      flex: 1,
-      borderWidth: 4,
-      borderColor: 'green',
-    };
   
     return (
             <ScrollView>
@@ -241,11 +256,30 @@ const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }):
                           key={game.timestamp}
                           onPress={() => onGameClick(game)}
                         >
-                        <View>
+                        <View style={styles.item_container}>
                           <Text>Mode Number: {game.mode}</Text>
                           <Text>Organization Name: {game.orgName}</Text>
                           <Text>Date: {game.timestamp}</Text>
-                        </View>
+                          <Image
+  source={
+    (() => {
+      switch (game.mode) {
+        case '1':
+          return require('./images/1.png');
+        case '2':
+          return require('./images/2.png');
+        case '3':
+          return require('./images/3.png');
+        default:
+          // Set a default image source if the mode doesn't match any case
+          return require('./images/1.png');
+      }
+    })()
+  }
+  style={styles.mode_icon}
+/>                        
+                      </View>
+                        <View style={styles.separator} />
                       </TouchableOpacity>
                     ))}
                 })}
@@ -257,18 +291,25 @@ const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }):
 const App = (): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
+  const [current_content, setCurrentContent] = useState("my_list");
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [showGameDetail, setShowGameDetail] = useState(false);
-  const handleGameClick = (game) => {
+  const handleGameClick = (game: Game) => {
     setIsLoggedIn(true);
     setShowGameDetail(true);
     setSelectedGame(game);
+    setCurrentContent("game_detail")
     setIsMentor(false);
     console.log("the chosen game is "+game._id);
+  };
+  const handleMenuClick = (current_content_component:string) => {
+    console.log(current_content_component)
+    setCurrentContent(current_content_component)
   };
   const handleLogin = () => {
     setIsLoggedIn(true);
     setIsMentor(true);
+    setCurrentContent("my_list")
   };
   return (
     <>
@@ -276,16 +317,17 @@ const App = (): JSX.Element => {
       <View style={styles.rootContainer}>
         <View style={styles.headerContainer}>
           <Image source={require('./images/logo.png')} style={styles.logo} />
-          <NavBar />        
+          <NavBar handleMenuClick={handleMenuClick}/>        
         </View>
         <View style={styles.middleContainer}>
           {!isLoggedIn && <LoginComponent onLogin={handleLogin} />}
-          {isLoggedIn && isMentor && <MentorMyListScreen onGameClick={handleGameClick} />}
-          {isLoggedIn && showGameDetail && (
+          {isLoggedIn && current_content == 'my_list' && <MentorMyListScreen onGameClick={handleGameClick} />}
+          {isLoggedIn && current_content == 'game_detail' && (
             <GameDetailScreen
               game={selectedGame}
             />
           )}
+          {isLoggedIn && current_content == 'home' && <MyChart />}
         </View>
       </View>
     </SafeAreaView>
@@ -331,6 +373,11 @@ const styles = StyleSheet.create({
    alignSelf:'center',
    flexDirection:'row-reverse'
  },
+ separator: {
+  height: 1,
+  backgroundColor: 'gray',
+  marginVertical: 8, // Adjust the spacing as needed
+},
  first_text_middle: {
    width:'80%',
    height:'10%'
@@ -399,8 +446,16 @@ accept_icon: {
   width: 50,
   height: 50,
 },
+mode_icon: {
+  width:50,
+  height:50,
+},
 deny_icon: {
   width: 50,
   height: 50,
 },
+item_container : {
+  justifyContent:'center',
+  alignItems:'center'
+}
 });
