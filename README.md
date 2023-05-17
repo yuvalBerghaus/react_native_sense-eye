@@ -21,4 +21,5 @@ Blackout eye shades - an eye cover designed to make sure that all players will b
 Headband - a headband that contains a unique ID  and buzzers which will communicate with our system.
 Buzzer - audio signalling device. 
 The language of beeps - This is a designed language where the player will understand what to do according to the sound the sensor makes. For example, as the player gets closer to the goal, the system will make more beeps.
+<br />
 <img src="https://s11.gifyu.com/images/Sense-Eye.gif">
