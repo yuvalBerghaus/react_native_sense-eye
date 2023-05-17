@@ -1,9 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './LoginScreen';
-import MentorMainScreen from './MentorMainScreen';
-import GameDetailScreen from './GameDetailScreen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,6 +20,102 @@ const NavBar = (): JSX.Element => {
     </View>
   )
 }
+
+interface Game {
+  _id : string,
+  mode: string;
+  orgName: string;
+  timestamp: string;
+  // Add any other properties as needed
+}
+
+const GameDetailScreen = ({ game }: { game: Game }): JSX.Element => {
+  console.log("the route is "+game);
+  const [refresh, setRefresh] = useState(false);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+//     // Fetch the recommendations data from the server
+    useEffect(() => {
+      axios.get('http://192.168.14.3:8000/api/rec')
+        .then(response => {
+          const data = response.data;
+          setRecommendations(data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }, []);
+function handleButtonPress(recommendationId:string, color:string) {
+  const url = `http://192.168.14.3:8000/api/rec/${recommendationId}`;
+  const body = {
+    status: color === 'green' ? 1 : -1
+  };
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+    .then(response => {
+      // Reload the current page
+      setRefresh(true)
+      console.log(response.json());
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+
+}
+
+  return (
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {recommendations.length > 0 ? (
+                recommendations
+                .filter(
+                    recommendation =>
+                    recommendation.gameID === game.timestamp
+                )
+                .map(recommendation => (
+                    <View key={recommendation._id} style={styles.listItem}>
+                    <Image
+                        source={{ uri: recommendation.frame }}
+                        style={styles.listItemImage}
+                    />
+                    <Text>{recommendation.orgName}</Text>
+                    <Text>{recommendation.gameID}</Text>
+                    <View style={styles.accept_or_deny_container}>
+                        <TouchableOpacity
+                        onPress={() => handleButtonPress(recommendation._id, 'green')}
+                        >
+                        <Image
+                            source={require('./images/V.png')}
+                            style={styles.accept_icon}
+                        />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                        onPress={() => handleButtonPress(recommendation._id, 'red')}
+                        >
+                        <Image
+                            source={require('./images/X.png')}
+                            style={styles.deny_icon}
+                        />
+                        </TouchableOpacity>
+                    </View>
+                    </View>
+                ))
+            ) : (
+                <Text>No recommendations found</Text>
+            )}
+            </ScrollView>
+  );
+};
+
+
+
+
+
 
 const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   const [email, setUsername] = useState('');
@@ -59,7 +150,7 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
       })
       .then(data => {
         // Use the JSON data
-        console.log(data);
+
         // Store the user data using AsyncStorage or another storage method
         // For example:
         AsyncStorage.setItem("user_token", data.accessToken);
@@ -100,9 +191,10 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   </>
   )
 }
+type GameClickHandler = (game: Game) => void;
 
-const MentorMyListScreen = (): JSX.Element => {
-    let successRecStatus = 0;
+const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }): JSX.Element => {
+  let successRecStatus = 0;
     let wrongRecStatus = 0;
     // const navigation = useNavigation();
     const [gameList, setGameList] = useState<any[]>([]);
@@ -142,14 +234,15 @@ const MentorMyListScreen = (): JSX.Element => {
     return (
             <ScrollView>
                 {gameList.map(game => {
+                  console.log("game details is "+game._id)
                   if(game.orgName === org_name){
                     return ((
                         <TouchableOpacity
                           key={game.timestamp}
-                          // onPress={() => navigation.navigate('GameDetailScreen', { game })}
+                          onPress={() => onGameClick(game)}
                         >
                         <View>
-                          <Text>Organization Number: {game.mode}</Text>
+                          <Text>Mode Number: {game.mode}</Text>
                           <Text>Organization Name: {game.orgName}</Text>
                           <Text>Date: {game.timestamp}</Text>
                         </View>
@@ -164,6 +257,15 @@ const MentorMyListScreen = (): JSX.Element => {
 const App = (): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<any>(null);
+  const [showGameDetail, setShowGameDetail] = useState(false);
+  const handleGameClick = (game) => {
+    setIsLoggedIn(true);
+    setShowGameDetail(true);
+    setSelectedGame(game);
+    setIsMentor(false);
+    console.log("the chosen game is "+game._id);
+  };
   const handleLogin = () => {
     setIsLoggedIn(true);
     setIsMentor(true);
@@ -178,7 +280,12 @@ const App = (): JSX.Element => {
         </View>
         <View style={styles.middleContainer}>
           {!isLoggedIn && <LoginComponent onLogin={handleLogin} />}
-          {isLoggedIn && isMentor && <MentorMyListScreen />}
+          {isLoggedIn && isMentor && <MentorMyListScreen onGameClick={handleGameClick} />}
+          {isLoggedIn && showGameDetail && (
+            <GameDetailScreen
+              game={selectedGame}
+            />
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -262,6 +369,11 @@ const styles = StyleSheet.create({
   borderWidth: 4,
   // borderColor: 'green',
 },
+accept_or_deny_container: {
+  flexDirection: 'row-reverse',
+  justifyContent: 'space-around',
+
+}, 
 navbar: {
   flexDirection: 'row',
   justifyContent: 'space-around',
@@ -269,5 +381,26 @@ navbar: {
   width: '100%',
   height: 50,
   backgroundColor: 'lightgray',
+},
+scrollViewContent: {
+  flexGrow: 1,
+},
+listItem: {
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: 'lightgray',
+},
+listItemImage: {
+  width: 200,
+  height: 200,
+  marginBottom: 8,
+},
+accept_icon: {
+  width: 50,
+  height: 50,
+},
+deny_icon: {
+  width: 50,
+  height: 50,
 },
 });
