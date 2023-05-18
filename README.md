@@ -23,5 +23,6 @@ Headband - a headband that contains a unique ID  and buzzers which will communic
 Buzzer - audio signalling device. 
 The language of beeps - This is a designed language where the player will understand what to do according to the sound the sensor makes. For example, as the player gets closer to the goal, the system will make more beeps.
 <br />
+<br />
 ![App](https://github.com/yuvalBerghaus/react_native_sense-eye/assets/65304080/19f108e8-66c5-4bde-a0fc-84ac03e0f17f)
 )
