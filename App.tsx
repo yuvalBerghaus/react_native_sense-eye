@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions,  Button ,Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import WebView from 'react-native-webview';
-import ChartsEmbedSDK from '@mongodb-js/charts-embed-dom';
 
 // const Stack = createStackNavigator();
 
@@ -52,6 +51,44 @@ interface Game {
   timestamp: string;
   // Add any other properties as needed
 }
+const InsightComponent = ({ game }: { game: Game }): JSX.Element => {
+  console.log("the route is "+game);
+  const [refresh, setRefresh] = useState(false);
+  const [insights, setInsights] = useState<any[]>([]);
+//     // Fetch the recommendations data from the server
+    useEffect(() => {
+      axios.get(`http://192.168.14.3:8000/api/statistics/${game.timestamp}`)
+        .then(response => {
+          const data = response.data;
+          setInsights(data);
+          console.log(data)
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }, []);
+
+  return (
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {insights.length > 0 ? (
+                insights
+                .map(insight => (
+                    <View key={insight._id} style={styles.listItem}>
+                    <Image
+                        source={{ uri: insight.frame }}
+                        style={styles.listItemImage}
+                    />
+                    <Text>{insight.orgName}</Text>
+                    <Text>{insight.gameID}</Text>
+                    </View>
+                ))
+            ) : (
+                <Text>No recommendations found</Text>
+            )}
+            </ScrollView>
+  );
+};
+
 
 const GameDetailScreen = ({ game }: { game: Game }): JSX.Element => {
   console.log("the route is "+game);
@@ -137,6 +174,68 @@ function handleButtonPress(recommendationId:string, color:string) {
 };
 
 
+const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element => {
+  const [email, setUsername] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginMessage, setLoginMessage] = useState('');
+  
+  const handleSignUpClick = () => {
+    
+    // You can use the email and password here to send to the server
+    // using fetch or another method to authenticate the user
+    // For example:
+    fetch('http://192.168.14.3:8000/api/users/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email: email, password: password, role: role, name: name}),
+    })
+      .then(response => {
+        if (response.ok) {
+          // Extract the JSON data from the response
+          // Display the success message in the UI
+          setLoginMessage('Login successful');
+          return response.json();
+        } else if (response.status === 401) {
+          // Login failed due to unauthorized access
+          throw new Error('Unable to access user');
+        } else {
+          // Other error occurred
+          throw new Error('Login failed');
+        }
+      })
+      .then(() => {
+          onSignUp();
+      })
+      .catch(error => {
+        // Handle the error
+        console.error(error);
+        // Display the error message in the UI
+        setLoginMessage(error.message);
+      });
+  };
+
+  return (
+  <>
+    <Text style={styles.first_text_middle}>Signup to Sense-Eye</Text>
+    <TextInput style={styles.input_email} value={email}
+      onChangeText={setUsername} placeholder="Email"></TextInput>
+      <TextInput style={styles.input_name} value={name}
+      onChangeText={setName} placeholder="Name"></TextInput>
+      <TextInput style={styles.input_role} value={role}
+      onChangeText={setRole} placeholder="Role"></TextInput>
+      <TextInput style={styles.input_email} value={password} onChangeText={setPassword}
+    secureTextEntry placeholder="Password"></TextInput>
+    <Text style={styles.footer_text}>Need help? Contact Support</Text>
+    <TouchableOpacity onPress={handleSignUpClick}>
+    <Image source={require('./images/signup_button.png')} style={styles.image_arrow} />
+    </TouchableOpacity>
+  </>
+  )
+}
 
 
 
@@ -199,7 +298,9 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
         setLoginMessage(error.message);
       });
   };
-
+  const handleSignUp = () => {
+    
+  }
   return (
   <>
     <Text style={styles.first_text_middle}>Login to your account</Text>
@@ -215,8 +316,10 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   )
 }
 type GameClickHandler = (game: Game) => void;
+type InsightClickHandler = (game: Game) => void;
+type SignUpClickHandler = () => void;
 type MenuClickHandler = (menu:string) => void;
-const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }): JSX.Element => {
+const MentorMyListScreen = ({ onGameClick, onInsightsClick }: { onGameClick: GameClickHandler; onInsightsClick: InsightClickHandler }): JSX.Element => {
   let successRecStatus = 0;
     let wrongRecStatus = 0;
     // const navigation = useNavigation();
@@ -252,53 +355,66 @@ const MentorMyListScreen = ({ onGameClick }: { onGameClick: GameClickHandler }):
                   console.log("game details is "+game._id)
                   if(game.orgName === org_name){
                     return ((
-                        <TouchableOpacity
-                          key={game.timestamp}
-                          onPress={() => onGameClick(game)}
-                        >
+                        <>
                         <View style={styles.item_container}>
-                          <Text>Mode Number: {game.mode}</Text>
-                          <Text>Organization Name: {game.orgName}</Text>
-                          <Text>Date: {game.timestamp}</Text>
-                          <Image
-  source={
-    (() => {
-      switch (game.mode) {
-        case '1':
-          return require('./images/1.png');
-        case '2':
-          return require('./images/2.png');
-        case '3':
-          return require('./images/3.png');
-        default:
-          // Set a default image source if the mode doesn't match any case
-          return require('./images/1.png');
-      }
-    })()
-  }
-  style={styles.mode_icon}
-/>                        
-                      </View>
-                        <View style={styles.separator} />
-                      </TouchableOpacity>
+                        <Text>Mode Number: {game.mode}</Text>
+                        <Text>Organization Name: {game.orgName}</Text>
+                        <Text>Date: {game.timestamp}</Text>
+                        <View style={styles.button_items}>
+                          <TouchableOpacity
+                            key={game.timestamp}  /*TODO CHANGE KEY BECAUSE OF DUPLICATE! */
+                            onPress={() => onGameClick(game)}
+                          >
+                            <Image
+                              source={require('./images/review.png')}
+                              style={styles.mode_icon} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            key={game._id} /*TODO CHANGE KEY BECAUSE OF DUPLICATE! */
+                            onPress={() => onInsightsClick(game)}
+                          >
+                            <Image
+                              source={require('./images/statistic.png')}
+                              style={styles.mode_icon} />
+                          </TouchableOpacity>
+                        </View>
+                      </View><View style={styles.separator} />
+                      </>
+                      
                     ))}
                 })}
           </ScrollView>
     );
   
 }
-
+const ButtonComponent = ({value, color}): JSX.Element => {
+  return (
+    <Button onPress={() => Alert.alert('Simple Button pressed')}
+        title="Press me"
+      />
+  )
+}
 const App = (): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
-  const [current_content, setCurrentContent] = useState("my_list");
+  const [current_content, setCurrentContent] = useState("login_component");
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [showGameDetail, setShowGameDetail] = useState(false);
+  const [showGameInsight, setShowGameInsight] = useState(false);
   const handleGameClick = (game: Game) => {
-    setIsLoggedIn(true);
     setShowGameDetail(true);
     setSelectedGame(game);
     setCurrentContent("game_detail")
+    setIsMentor(false);
+    console.log("the chosen game is "+game._id);
+  };
+  const handleSignUpClick = () => {
+    setIsMentor(false);
+  };
+  const handleInsightClick = (game: Game) => {
+    setShowGameInsight(true);
+    setSelectedGame(game);
+    setCurrentContent("insight_component")
     setIsMentor(false);
     console.log("the chosen game is "+game._id);
   };
@@ -320,14 +436,25 @@ const App = (): JSX.Element => {
           <NavBar handleMenuClick={handleMenuClick}/>        
         </View>
         <View style={styles.middleContainer}>
-          {!isLoggedIn && <LoginComponent onLogin={handleLogin} />}
-          {isLoggedIn && current_content == 'my_list' && <MentorMyListScreen onGameClick={handleGameClick} />}
+        {!isLoggedIn && current_content == "login_component" &&(
+          <>
+            <LoginComponent onLogin={handleLogin} />
+            <Button onPress={() => setCurrentContent("signup_component")} title="Sign Up" />
+          </>
+        )}
+          {isLoggedIn && current_content == 'my_list' && <MentorMyListScreen onGameClick={handleGameClick} onInsightsClick={handleInsightClick} />}
           {isLoggedIn && current_content == 'game_detail' && (
             <GameDetailScreen
               game={selectedGame}
             />
           )}
+          {isLoggedIn && current_content == 'insight_component' && (
+            <InsightComponent
+              game={selectedGame}
+            />
+          )}
           {isLoggedIn && current_content == 'home' && <MyChart />}
+          {!isLoggedIn && current_content == 'signup_component' && <SignUpComponent onSignUp={handleSignUpClick} />}
         </View>
       </View>
     </SafeAreaView>
@@ -390,6 +517,22 @@ const styles = StyleSheet.create({
    paddingLeft: 10,
    backgroundColor:'white'
  },
+ input_role: {
+  width: '80%',
+  borderColor: 'gray',
+  borderWidth: 1,
+  marginBottom: 20,
+  paddingLeft: 10,
+  backgroundColor:'white'
+},
+input_name: {
+  width: '80%',
+  borderColor: 'gray',
+  borderWidth: 1,
+  marginBottom: 20,
+  paddingLeft: 10,
+  backgroundColor:'white'
+},
  footerContainer: {
    flexDirection:'row',
    width: '100%',
@@ -406,6 +549,10 @@ const styles = StyleSheet.create({
    width: 50,
    height: 50
  },
+ signup_button: {
+  width: 53,
+  height: 50
+},
  logo: {
    width: "100%",
    height: "70%"
@@ -438,9 +585,9 @@ listItem: {
   borderBottomColor: 'lightgray',
 },
 listItemImage: {
-  width: 200,
-  height: 200,
-  marginBottom: 8,
+  width: 300,
+  height: 300,
+  marginBottom: 0,
 },
 accept_icon: {
   width: 50,
@@ -457,5 +604,10 @@ deny_icon: {
 item_container : {
   justifyContent:'center',
   alignItems:'center'
+},
+button_items : {
+  flexDirection:'row',
+  width: '50%',
+  justifyContent: 'space-between'
 }
 });
