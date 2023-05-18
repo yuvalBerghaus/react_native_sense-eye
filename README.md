@@ -1,7 +1,5 @@
 ![Sense-Eye](https://user-images.githubusercontent.com/65304080/215279708-06625f88-8716-4927-8cf1-c098db58e364.png)
 
-![App](https://i.ibb.co/C65f8tz/Sense-Eye.gif)
-
 # Welcome to Sense-Eye system!
 
 ## Introduction
@@ -25,5 +23,4 @@ Headband - a headband that contains a unique ID  and buzzers which will communic
 Buzzer - audio signalling device. 
 The language of beeps - This is a designed language where the player will understand what to do according to the sound the sensor makes. For example, as the player gets closer to the goal, the system will make more beeps.
 <br />
-<img src="https://i.ibb.co/C65f8tz/Sense-Eye.gif" />
-![](https://i.ibb.co/C65f8tz/Sense-Eye.gif)
+![App](https://i.ibb.co/C65f8tz/Sense-Eye.gif)
