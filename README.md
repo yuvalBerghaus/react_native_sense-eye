@@ -22,4 +22,4 @@ Headband - a headband that contains a unique ID  and buzzers which will communic
 Buzzer - audio signalling device. 
 The language of beeps - This is a designed language where the player will understand what to do according to the sound the sensor makes. For example, as the player gets closer to the goal, the system will make more beeps.
 <br />
-<img src="https://s11.gifyu.com/images/Sense-Eye.gif">
+<img src="https://i.ibb.co/C65f8tz/Sense-Eye.gif" alt="Sense-Eye" border="0">
