@@ -1,4 +1,7 @@
 ![Sense-Eye](https://user-images.githubusercontent.com/65304080/215279708-06625f88-8716-4927-8cf1-c098db58e364.png)
+
+![App](https://i.ibb.co/C65f8tz/Sense-Eye.gif)
+
 # Welcome to Sense-Eye system!
 
 ## Introduction
