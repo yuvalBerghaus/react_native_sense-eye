@@ -143,7 +143,7 @@ return (
             <>
             <Text style={styles.text}>{chosen_gameID}</Text>
             <Text style={styles.text}>{chosen_orgName}</Text>
-            <View key={recommendation._id} style={styles.listItem}>
+            <View key={recommendation.frame} style={styles.listItem}>
               <Image source={{ uri: recommendation.frame }} style={styles.listItemImage} />
               <Text style={styles.text}>current status: </Text>
               <Image
@@ -305,10 +305,10 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   };
   return (
   <>
-    <Text style={styles.first_text_middle}>Login to your account</Text>
-    <TextInput style={styles.input_email} value={email}
+    <Text style={styles.text}>Login to your account</Text>
+    <TextInput style={styles.input_email} placeholderTextColor="gray" value={email}
       onChangeText={setUsername} placeholder="Email"></TextInput>
-      <TextInput style={styles.input_email} value={password} onChangeText={setPassword}
+      <TextInput style={styles.input_email} placeholderTextColor="gray"  value={password} onChangeText={setPassword}
     secureTextEntry placeholder="Password"></TextInput>
     <Text style={styles.footer_text}>Need help? Contact Support</Text>
     <TouchableOpacity onPress={handleLogin}>
@@ -548,10 +548,7 @@ const styles = StyleSheet.create({
   backgroundColor: 'gray',
   marginVertical: 8, // Adjust the spacing as needed
 },
- first_text_middle: {
 
-
- },
  input_email: {
    width: '80%',
    borderColor: 'gray',
