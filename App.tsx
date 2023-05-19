@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState ,useMemo} from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions,  Button ,Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import WebView from 'react-native-webview';
+import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group';
+
 
 // const Stack = createStackNavigator();
 
@@ -177,16 +179,19 @@ function handleButtonPress(recommendationId:string, color:string) {
 const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element => {
   const [email, setUsername] = useState('');
   const [name, setName] = useState('');
+  const [orgName, setOrgName] = useState('');
   const [role, setRole] = useState('');
   const [password, setPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState('');
-  
+  const handleChangeRadio = (role:string) => {
+    setRole(role);
+  }
   const handleSignUpClick = () => {
     
     // You can use the email and password here to send to the server
     // using fetch or another method to authenticate the user
     // For example:
-    fetch('http://192.168.14.3:8000/api/users/signup', {
+    fetch('http://192.168.14.3:8000/api/users/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -197,14 +202,14 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
         if (response.ok) {
           // Extract the JSON data from the response
           // Display the success message in the UI
-          setLoginMessage('Login successful');
+          setLoginMessage('Signup successful');
           return response.json();
         } else if (response.status === 401) {
           // Login failed due to unauthorized access
-          throw new Error('Unable to access user');
+          throw new Error('Unable to add user');
         } else {
           // Other error occurred
-          throw new Error('Login failed');
+          throw new Error('Signup failed');
         }
       })
       .then(() => {
@@ -225,14 +230,16 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
       onChangeText={setUsername} placeholder="Email"></TextInput>
       <TextInput style={styles.input_name} value={name}
       onChangeText={setName} placeholder="Name"></TextInput>
-      <TextInput style={styles.input_role} value={role}
-      onChangeText={setRole} placeholder="Role"></TextInput>
+      <TextInput style={styles.input_name} value={name}
+      onChangeText={setOrgName} placeholder="Organization name"></TextInput>
+      <RadioOptions onChangeRadio={handleChangeRadio}/>
       <TextInput style={styles.input_email} value={password} onChangeText={setPassword}
     secureTextEntry placeholder="Password"></TextInput>
     <Text style={styles.footer_text}>Need help? Contact Support</Text>
     <TouchableOpacity onPress={handleSignUpClick}>
     <Image source={require('./images/signup_button.png')} style={styles.image_arrow} />
     </TouchableOpacity>
+    
   </>
   )
 }
@@ -298,9 +305,6 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
         setLoginMessage(error.message);
       });
   };
-  const handleSignUp = () => {
-    
-  }
   return (
   <>
     <Text style={styles.first_text_middle}>Login to your account</Text>
@@ -387,13 +391,41 @@ const MentorMyListScreen = ({ onGameClick, onInsightsClick }: { onGameClick: Gam
     );
   
 }
-const ButtonComponent = ({value, color}): JSX.Element => {
-  return (
-    <Button onPress={() => Alert.alert('Simple Button pressed')}
-        title="Press me"
-      />
-  )
+
+
+const RadioOptions = ({ onChangeRadio }: { onChangeRadio: (selectedRole:string) => void }) => {
+  const radioButtons: RadioButtonProps[] = useMemo(() => ([
+    {
+        id: '1', // acts as primary key, should be unique and non-empty string
+        label: 'Mentor',
+        value: 'Mentor'
+    },
+    {
+        id: '2',
+        label: 'Player',
+        value: 'Player'
+    }
+]), []);
+
+const [selectedId, setSelectedId] = useState<string | undefined>();
+const handleSignUpClick = () => {
+  onChangeRadio(selectedId);
 }
+return (
+    <RadioGroup 
+      radioButtons={radioButtons} 
+      onPress={setSelectedId}
+      selectedId={selectedId}
+    />
+);
+
+};
+
+
+
+
+
+
 const App = (): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
@@ -462,6 +494,7 @@ const App = (): JSX.Element => {
   );
 };
 export default App;
+
 
 const windowsHight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
@@ -609,5 +642,28 @@ button_items : {
   flexDirection:'row',
   width: '50%',
   justifyContent: 'space-between'
-}
+},
+radioButton: {
+  borderWidth: 1,
+  borderColor: 'gray',
+  borderRadius: 12,
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  marginRight: 10,
+},
+radioButtonSelected: {
+  backgroundColor: 'blue',
+  borderColor: 'blue',
+},
+radioButtonActive: {
+  backgroundColor: 'blue',
+  borderColor: 'blue',
+},
+radioButtonLabel: {
+  fontSize: 16,
+  color: 'black',
+},
+selectedOptionText: {
+  fontSize: 18,
+},
 });
