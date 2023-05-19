@@ -5,8 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import WebView from 'react-native-webview';
 import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group';
-
-
 // const Stack = createStackNavigator();
 
 
@@ -33,14 +31,14 @@ const MyChart = () => {
 
 const NavBar = ({ handleMenuClick }: { handleMenuClick: MenuClickHandler }): JSX.Element => {  return (
     <View style={styles.navbar}>
-    <TouchableOpacity onPress={() => handleMenuClick('home')}>
-      <Text>Home</Text>
+    <TouchableOpacity onPress={() => handleMenuClick('login_component')}>
+      <Text style={styles.text}>Home</Text>
     </TouchableOpacity>
     <TouchableOpacity onPress={() => handleMenuClick('my_list')}>
-        <Text>My List</Text>
+        <Text style={styles.text}>My List</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleMenuClick('results')}>
-        <Text>Results</Text>
+      <TouchableOpacity onPress={() => handleMenuClick('results_component')}>
+        <Text style={styles.text}>Results</Text>
       </TouchableOpacity>
     </View>
   )
@@ -80,12 +78,12 @@ const InsightComponent = ({ game }: { game: Game }): JSX.Element => {
                         source={{ uri: insight.frame }}
                         style={styles.listItemImage}
                     />
-                    <Text>{insight.orgName}</Text>
-                    <Text>{insight.gameID}</Text>
+                    <Text style={styles.text}>{insight.orgName}</Text>
+                    <Text style={styles.text}>{insight.gameID}</Text>
                     </View>
                 ))
             ) : (
-                <Text>No recommendations found</Text>
+                <Text style={styles.text}>No recommendations found</Text>
             )}
             </ScrollView>
   );
@@ -132,47 +130,44 @@ function handleButtonPress(recommendationId:string, color:string) {
 
 }
 
-  return (
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {recommendations.length > 0 ? (
-                recommendations
-                .filter(
-                    recommendation =>
-                    recommendation.gameID === game.timestamp
-                )
-                .map(recommendation => (
-                    <View key={recommendation._id} style={styles.listItem}>
-                    <Image
-                        source={{ uri: recommendation.frame }}
-                        style={styles.listItemImage}
-                    />
-                    <Text>{recommendation.orgName}</Text>
-                    <Text>{recommendation.gameID}</Text>
-                    <View style={styles.accept_or_deny_container}>
-                        <TouchableOpacity
-                        onPress={() => handleButtonPress(recommendation._id, 'green')}
-                        >
-                        <Image
-                            source={require('./images/V.png')}
-                            style={styles.accept_icon}
-                        />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                        onPress={() => handleButtonPress(recommendation._id, 'red')}
-                        >
-                        <Image
-                            source={require('./images/X.png')}
-                            style={styles.deny_icon}
-                        />
-                        </TouchableOpacity>
-                    </View>
-                    </View>
-                ))
-            ) : (
-                <Text>No recommendations found</Text>
-            )}
-            </ScrollView>
-  );
+return (
+  <ScrollView contentContainerStyle={styles.scrollViewContent}>
+    {recommendations.length > 0 ? (
+      recommendations
+        .filter(recommendation => recommendation.gameID === game.timestamp)
+        .map((recommendation, index) => {
+          const isFirstRecommendation = index === 0;
+          const chosen_gameID = isFirstRecommendation ? recommendation.gameID : null;
+          const chosen_orgName = isFirstRecommendation ? recommendation.orgName : null;
+          return (
+            <>
+            <Text style={styles.text}>{chosen_gameID}</Text>
+            <Text style={styles.text}>{chosen_orgName}</Text>
+            <View key={recommendation._id} style={styles.listItem}>
+              <Image source={{ uri: recommendation.frame }} style={styles.listItemImage} />
+              <Text style={styles.text}>current status: </Text>
+              <Image
+                source={recommendation.status === -1 ? require('./images/X.png') : require('./images/V.png')}
+                style={styles.current_status}
+              />
+              <View style={styles.accept_or_deny_container}>
+                <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'green')}>
+                  <Image source={require('./images/V.png')} style={styles.accept_icon} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'red')}>
+                  <Image source={require('./images/X.png')} style={styles.deny_icon} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            </>
+          );
+        })
+    ) : (
+      <Text>No recommendations found</Text>
+    )}
+  </ScrollView>
+);
 };
 
 
@@ -196,7 +191,7 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email: email, password: password, role: role, name: name}),
+      body: JSON.stringify({ email: email, password: password, role: role, name: name, orgName: orgName}),
     })
       .then(response => {
         if (response.ok) {
@@ -212,8 +207,12 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
           throw new Error('Signup failed');
         }
       })
-      .then(() => {
+      .then((data) => {
           onSignUp();
+          Alert.alert(
+            `Success!`,
+            `The user ${data.name} signed up!`,
+          );
       })
       .catch(error => {
         // Handle the error
@@ -225,16 +224,16 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
 
   return (
   <>
-    <Text style={styles.first_text_middle}>Signup to Sense-Eye</Text>
+    <Text style={styles.text}>Signup to Sense-Eye</Text>
     <TextInput style={styles.input_email} value={email}
-      onChangeText={setUsername} placeholder="Email"></TextInput>
+      onChangeText={setUsername} placeholderTextColor="gray" placeholder="Email"></TextInput>
       <TextInput style={styles.input_name} value={name}
-      onChangeText={setName} placeholder="Name"></TextInput>
-      <TextInput style={styles.input_name} value={name}
-      onChangeText={setOrgName} placeholder="Organization name"></TextInput>
+      onChangeText={setName} placeholder="Name" placeholderTextColor="gray"></TextInput>
+      <TextInput style={styles.input_name} value={orgName}
+      onChangeText={setOrgName} placeholder="Organization name" placeholderTextColor="gray"></TextInput>
       <RadioOptions onChangeRadio={handleChangeRadio}/>
       <TextInput style={styles.input_email} value={password} onChangeText={setPassword}
-    secureTextEntry placeholder="Password"></TextInput>
+    secureTextEntry placeholder="Password" placeholderTextColor="gray"></TextInput>
     <Text style={styles.footer_text}>Need help? Contact Support</Text>
     <TouchableOpacity onPress={handleSignUpClick}>
     <Image source={require('./images/signup_button.png')} style={styles.image_arrow} />
@@ -250,7 +249,6 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   const [email, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState('');
-  
   const handleLogin = () => {
     
     // You can use the email and password here to send to the server
@@ -267,7 +265,7 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
         if (response.ok) {
           // Extract the JSON data from the response
           // Display the success message in the UI
-          setLoginMessage('Login successful');
+          // setLoginMessage("Login Success!");
           return response.json();
         } else if (response.status === 401) {
           // Login failed due to unauthorized access
@@ -361,9 +359,9 @@ const MentorMyListScreen = ({ onGameClick, onInsightsClick }: { onGameClick: Gam
                     return ((
                         <>
                         <View style={styles.item_container}>
-                        <Text>Mode Number: {game.mode}</Text>
-                        <Text>Organization Name: {game.orgName}</Text>
-                        <Text>Date: {game.timestamp}</Text>
+                        <Text style={styles.text}>Mode Number: {game.mode}</Text>
+                        <Text style={styles.text}>Organization Name: {game.orgName}</Text>
+                        <Text style={styles.text}>Date: {game.timestamp}</Text>
                         <View style={styles.button_items}>
                           <TouchableOpacity
                             key={game.timestamp}  /*TODO CHANGE KEY BECAUSE OF DUPLICATE! */
@@ -392,33 +390,39 @@ const MentorMyListScreen = ({ onGameClick, onInsightsClick }: { onGameClick: Gam
   
 }
 
+const RadioOptions = ({ onChangeRadio }: { onChangeRadio: (selectedRole: string) => void }) => {
+  const radioButtons: RadioButtonProps[] = useMemo(
+    () => [
+      {
+        id: 'trainer',
+        label: 'Trainer',
+        value: 'Trainer',
+        color : 'black',
+        labelStyle : {color:'black'}
+      },
+      {
+        id: 'trainee',
+        label: 'Trainee',
+        value: 'Trainee',
+        labelStyle : {color:'black'}
+      },
+    ],
+    []
+  );
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const handleOptionChange = (selectedId: string) => {
+    setSelectedId(selectedId);
+    onChangeRadio(selectedId);
+  };
 
-const RadioOptions = ({ onChangeRadio }: { onChangeRadio: (selectedRole:string) => void }) => {
-  const radioButtons: RadioButtonProps[] = useMemo(() => ([
-    {
-        id: '1', // acts as primary key, should be unique and non-empty string
-        label: 'Mentor',
-        value: 'Mentor'
-    },
-    {
-        id: '2',
-        label: 'Player',
-        value: 'Player'
-    }
-]), []);
-
-const [selectedId, setSelectedId] = useState<string | undefined>();
-const handleSignUpClick = () => {
-  onChangeRadio(selectedId);
-}
-return (
-    <RadioGroup 
-      radioButtons={radioButtons} 
-      onPress={setSelectedId}
-      selectedId={selectedId}
+  return (
+    <RadioGroup
+    radioButtons={radioButtons}
+    onPress={handleOptionChange}
+    selectedId={selectedId}
+    layout="row"
     />
-);
-
+  );
 };
 
 
@@ -485,7 +489,7 @@ const App = (): JSX.Element => {
               game={selectedGame}
             />
           )}
-          {isLoggedIn && current_content == 'home' && <MyChart />}
+          {isLoggedIn && current_content == 'results_component' && <MyChart />}
           {!isLoggedIn && current_content == 'signup_component' && <SignUpComponent onSignUp={handleSignUpClick} />}
         </View>
       </View>
@@ -517,7 +521,12 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     backgroundColor: 'white',
   },
+  text: {
+    color: 'black', // Replace 'blue' with your desired custom color,
+    
+  },
   middleContainer: {
+    color:'black',
    width: '100%',
    flex:3,
    flexDirection:"column",
@@ -527,7 +536,8 @@ const styles = StyleSheet.create({
   title: {
    fontFamily:"arial",
    fontSize: 30,
-   textAlign:'center'
+   textAlign:'center',
+   color: 'black'
  },
  leftImage: {
    alignSelf:'center',
@@ -539,16 +549,19 @@ const styles = StyleSheet.create({
   marginVertical: 8, // Adjust the spacing as needed
 },
  first_text_middle: {
-   width:'80%',
-   height:'10%'
+  //  width:'80%',
+  //  height:'10%'
+  fontWeight:'bold',
+  color: 'black'
  },
  input_email: {
    width: '80%',
    borderColor: 'gray',
+   color:'black',
    borderWidth: 1,
    marginBottom: 20,
    paddingLeft: 10,
-   backgroundColor:'white'
+   backgroundColor:'white',
  },
  input_role: {
   width: '80%',
@@ -556,7 +569,8 @@ const styles = StyleSheet.create({
   borderWidth: 1,
   marginBottom: 20,
   paddingLeft: 10,
-  backgroundColor:'white'
+  backgroundColor:'white',
+  color: 'black'
 },
 input_name: {
   width: '80%',
@@ -564,7 +578,8 @@ input_name: {
   borderWidth: 1,
   marginBottom: 20,
   paddingLeft: 10,
-  backgroundColor:'white'
+  backgroundColor:'white',
+  color: 'black'
 },
  footerContainer: {
    flexDirection:'row',
@@ -576,7 +591,8 @@ input_name: {
    alignContent: 'flex-end'
  },
  footer_text : {
-     width:'39%'
+     width:'39%',
+     color: 'black'
  },
  image_arrow: {
    width: 50,
@@ -654,16 +670,21 @@ radioButton: {
 radioButtonSelected: {
   backgroundColor: 'blue',
   borderColor: 'blue',
+  
 },
 radioButtonActive: {
   backgroundColor: 'blue',
   borderColor: 'blue',
+  
 },
 radioButtonLabel: {
-  fontSize: 16,
   color: 'black',
 },
 selectedOptionText: {
   fontSize: 18,
 },
+current_status: {
+  width:20,
+  height:20
+}
 });
