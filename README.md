@@ -24,5 +24,5 @@ Buzzer - audio signalling device.
 The language of beeps - This is a designed language where the player will understand what to do according to the sound the sensor makes. For example, as the player gets closer to the goal, the system will make more beeps.
 <br />
 <br />
-![App](https://github.com/yuvalBerghaus/react_native_sense-eye/assets/65304080/19f108e8-66c5-4bde-a0fc-84ac03e0f17f)
-)
+![Sense-Eye](https://github.com/yuvalBerghaus/react_native_sense-eye/assets/65304080/7ecf87a5-b2ba-4418-94dc-0dc6b7c81cd1)
+
