@@ -549,10 +549,8 @@ const styles = StyleSheet.create({
   marginVertical: 8, // Adjust the spacing as needed
 },
  first_text_middle: {
-  //  width:'80%',
-  //  height:'10%'
-  fontWeight:'bold',
-  color: 'black'
+
+
  },
  input_email: {
    width: '80%',
