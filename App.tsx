@@ -78,8 +78,6 @@ const InsightComponent = ({ game }: { game: Game }): JSX.Element => {
                         source={{ uri: insight.frame }}
                         style={styles.listItemImage}
                     />
-                    <Text style={styles.text}>{insight.orgName}</Text>
-                    <Text style={styles.text}>{insight.gameID}</Text>
                     </View>
                 ))
             ) : (
@@ -146,8 +144,8 @@ const GameDetailScreen = ({ game }: { game: Game }): JSX.Element => {
 
             return (
               <React.Fragment key={recommendation.frame}>
-                <Text style={styles.text}>{chosen_gameID}</Text>
-                <Text style={styles.text}>{chosen_orgName}</Text>
+                <Text style={styles.title}>{chosen_gameID}</Text>
+                <Text style={styles.title}>{chosen_orgName}</Text>
                 {!isHidden && (
                   <View style={styles.listItem}>
                     <Image source={{ uri: recommendation.frame }} style={styles.listItemImage} />
@@ -231,7 +229,8 @@ const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element =>
 
   return (
   <>
-    <Text style={styles.text}>Signup to Sense-Eye</Text>
+    <Text style={styles.title}>Signup to Sense-Eye</Text>
+    <View style={styles.lineBreak} />
     <TextInput style={styles.input_email} value={email}
       onChangeText={setUsername} placeholderTextColor="gray" placeholder="Email"></TextInput>
       <TextInput style={styles.input_name} value={name}
@@ -312,7 +311,8 @@ const LoginComponent = ({ onLogin }: { onLogin: () => void }): JSX.Element => {
   };
   return (
   <>
-    <Text style={styles.text}>Login to your account</Text>
+    <Text style={styles.title}>Login to your account</Text>
+    <View style={styles.lineBreak} />
     <TextInput style={styles.input_email} placeholderTextColor="gray" value={email}
       onChangeText={setUsername} placeholder="Email"></TextInput>
       <TextInput style={styles.input_email} placeholderTextColor="gray"  value={password} onChangeText={setPassword}
@@ -334,6 +334,7 @@ const MentorMyListScreen = ({ onGameClick, onInsightsClick }: { onGameClick: Gam
     // const navigation = useNavigation();
     const [gameList, setGameList] = useState<any[]>([]);
     const [org_name, setOrgName] = useState<string>("");
+    
       // Retrieve the value
       AsyncStorage.getItem('user_org_name')
       .then((value) => {
@@ -440,6 +441,7 @@ const RadioOptions = ({ onChangeRadio }: { onChangeRadio: (selectedRole: string)
 const App = (): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
+  const [userType, setUserType] = useState("");
   const [current_content, setCurrentContent] = useState("login_component");
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [showGameDetail, setShowGameDetail] = useState(false);
@@ -542,7 +544,7 @@ const styles = StyleSheet.create({
  },
   title: {
    fontFamily:"arial",
-   fontSize: 30,
+   fontSize: 20,
    textAlign:'center',
    color: 'black'
  },
