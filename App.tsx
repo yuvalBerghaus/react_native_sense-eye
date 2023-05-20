@@ -91,85 +91,92 @@ const InsightComponent = ({ game }: { game: Game }): JSX.Element => {
 
 
 const GameDetailScreen = ({ game }: { game: Game }): JSX.Element => {
-  console.log("the route is "+game);
+  console.log("the route is " + game);
   const [refresh, setRefresh] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
-//     // Fetch the recommendations data from the server
-    useEffect(() => {
-      axios.get('http://192.168.14.3:8000/api/rec')
-        .then(response => {
-          const data = response.data;
-          setRecommendations(data);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }, []);
-function handleButtonPress(recommendationId:string, color:string) {
-  const url = `http://192.168.14.3:8000/api/rec/${recommendationId}`;
-  const body = {
-    status: color === 'green' ? 1 : -1
-  };
+  const [hiddenItems, setHiddenItems] = useState<string[]>([]);
 
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  })
-    .then(response => {
-      // Reload the current page
-      setRefresh(true)
-      console.log(response.json());
+  // Fetch the recommendations data from the server
+  useEffect(() => {
+    axios
+      .get('http://192.168.14.3:8000/api/rec')
+      .then(response => {
+        const data = response.data;
+        setRecommendations(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
+  function handleButtonPress(recommendationId: string, color: string) {
+    const url = `http://192.168.14.3:8000/api/rec/${recommendationId}`;
+    const body = {
+      status: color === 'green' ? 1 : -1
+    };
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
     })
-    .catch(error => {
-      console.error(error);
-    });
+      .then(response => {
+        // Reload the current page
+        setRefresh(true);
+        setHiddenItems([...hiddenItems, recommendationId]);
+        console.log(response.json());
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
 
+  return (
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      {recommendations.length > 0 ? (
+        recommendations
+          .filter(recommendation => recommendation.gameID === game.timestamp && recommendation.status === 0)
+          .map((recommendation, index) => {
+            const isFirstRecommendation = index === 0;
+            const chosen_gameID = isFirstRecommendation ? recommendation.gameID : null;
+            const chosen_orgName = isFirstRecommendation ? recommendation.orgName : null;
+            const isHidden = hiddenItems.includes(recommendation._id);
 
-}
-
-return (
-  <ScrollView contentContainerStyle={styles.scrollViewContent}>
-    {recommendations.length > 0 ? (
-      recommendations
-        .filter(recommendation => recommendation.gameID === game.timestamp)
-        .map((recommendation, index) => {
-          const isFirstRecommendation = index === 0;
-          const chosen_gameID = isFirstRecommendation ? recommendation.gameID : null;
-          const chosen_orgName = isFirstRecommendation ? recommendation.orgName : null;
-          return (
-            <>
-            <Text style={styles.text}>{chosen_gameID}</Text>
-            <Text style={styles.text}>{chosen_orgName}</Text>
-            <View key={recommendation.frame} style={styles.listItem}>
-              <Image source={{ uri: recommendation.frame }} style={styles.listItemImage} />
-              <Text style={styles.text}>current status: </Text>
-              <Image
-                source={recommendation.status === -1 ? require('./images/X.png') : require('./images/V.png')}
-                style={styles.current_status}
-              />
-              <View style={styles.accept_or_deny_container}>
-                <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'green')}>
-                  <Image source={require('./images/V.png')} style={styles.accept_icon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'red')}>
-                  <Image source={require('./images/X.png')} style={styles.deny_icon} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            </>
-          );
-        })
-    ) : (
-      <Text>No recommendations found</Text>
-    )}
-  </ScrollView>
-);
+            return (
+              <React.Fragment key={recommendation.frame}>
+                <Text style={styles.text}>{chosen_gameID}</Text>
+                <Text style={styles.text}>{chosen_orgName}</Text>
+                {!isHidden && (
+                  <View style={styles.listItem}>
+                    <Image source={{ uri: recommendation.frame }} style={styles.listItemImage} />
+                    {/* Uncomment the following lines if you want to show the commented-out code */}
+                    {/* <Text style={styles.text}>current status: </Text>
+                    <Image
+                      source={recommendation.status === -1 ? require('./images/X.png') : require('./images/V.png')}
+                      style={styles.current_status}
+                    /> */}
+                    <View style={styles.lineBreak} />
+                    <View style={styles.accept_or_deny_container}>
+                      <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'green')}>
+                        <Image source={require('./images/V.png')} style={styles.accept_icon} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => handleButtonPress(recommendation._id, 'red')}>
+                        <Image source={require('./images/X.png')} style={styles.deny_icon} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </React.Fragment>
+            );
+          })
+      ) : (
+        <Text>No recommendations found</Text>
+      )}
+    </ScrollView>
+  );
 };
-
 
 const SignUpComponent = ({ onSignUp }: { onSignUp: () => void }): JSX.Element => {
   const [email, setUsername] = useState('');
@@ -681,5 +688,8 @@ selectedOptionText: {
 current_status: {
   width:20,
   height:20
-}
+},
+lineBreak: {
+  height:10// Adjust the height as needed for the desired spacing
+},
 });
